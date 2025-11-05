@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loki Log Aggregation System</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+            margin-bottom: 40px;
+        }
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .endpoint {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+        }
+        .endpoint h3 {
+            margin-top: 0;
+            color: #ffd700;
+        }
+        .method {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .get { background: #4caf50; }
+        .post { background: #2196f3; }
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+        .status-ok { background: #4caf50; }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        a {
+            color: #ffd700;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        .tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+        .tool-card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            transition: transform 0.3s;
+        }
+        .tool-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔍 Loki</h1>
+        <div class="subtitle">Log Aggregation System for ai-servicers.com</div>
+        
+        <div class="status-card">
+            <h2><span class="status-indicator status-ok"></span>System Status</h2>
+            <p id="status">Checking status...</p>
+        </div>
+
+        <div class="status-card">
+            <h2>📊 API Endpoints</h2>
+            
+            <div class="endpoint">
+                <h3>Query Logs</h3>
+                <p><span class="method get">GET</span> <code>/loki/api/v1/query</code></p>
+                <p>Query logs at a single point in time</p>
+                <p>Example: <code>?query={job="containerlogs"}&limit=100</code></p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>Query Range</h3>
+                <p><span class="method get">GET</span> <code>/loki/api/v1/query_range</code></p>
+                <p>Query logs over a time range</p>
+                <p>Example: <code>?query={container_name="traefik"}&start=1609459200000000000&end=1609545600000000000</code></p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>Push Logs</h3>
+                <p><span class="method post">POST</span> <code>/loki/api/v1/push</code></p>
+                <p>Push logs to Loki (used by Promtail)</p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>Labels</h3>
+                <p><span class="method get">GET</span> <code>/loki/api/v1/labels</code></p>
+                <p>Get list of known labels</p>
+            </div>
+            
+            <div class="endpoint">
+                <h3>Label Values</h3>
+                <p><span class="method get">GET</span> <code>/loki/api/v1/label/{label_name}/values</code></p>
+                <p>Get values for a specific label</p>
+            </div>
+        </div>
+
+        <div class="tools">
+            <div class="tool-card">
+                <h3>🔧 Query Tools</h3>
+                <p>Use Grafana for visual log exploration:</p>
+                <p><a href="https://grafana.ai-servicers.com" target="_blank">Open Grafana →</a></p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>📝 LogQL Reference</h3>
+                <p>Learn the Loki Query Language:</p>
+                <p><a href="https://grafana.com/docs/loki/latest/logql/" target="_blank">LogQL Documentation →</a></p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>📈 Metrics</h3>
+                <p>View Loki internal metrics:</p>
+                <p><a href="/metrics" target="_blank">Prometheus Metrics →</a></p>
+            </div>
+            
+            <div class="tool-card">
+                <h3>🔍 Example Queries</h3>
+                <pre style="font-size: 0.9em; overflow-x: auto;">
+{job="containerlogs"} |= "error"
+{container_name="traefik"} | json
+{job="syslog"} |~ "failed|error"
+rate({job="containerlogs"}[5m])
+                </pre>
+            </div>
+        </div>
+
+        <div class="status-card" style="margin-top: 30px;">
+            <h2>ℹ️ System Information</h2>
+            <p><strong>Version:</strong> Loki 2.9.3</p>
+            <p><strong>Storage:</strong> Filesystem (30-day retention)</p>
+            <p><strong>Ingestion Rate:</strong> <span id="ingestion-rate">Calculating...</span></p>
+            <p><strong>Active Streams:</strong> <span id="active-streams">Calculating...</span></p>
+        </div>
+    </div>
+
+    <script>
+        // Check Loki status
+        fetch('/ready')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('status').innerHTML = 
+                    '<span style="color: #4caf50;">✓ Loki is operational</span>';
+            })
+            .catch(error => {
+                document.getElementById('status').innerHTML = 
+                    '<span style="color: #f44336;">✗ Unable to connect to Loki API</span>';
+            });
+
+        // Get metrics
+        fetch('/metrics')
+            .then(response => response.text())
+            .then(data => {
+                // Parse ingestion rate
+                const rateMatch = data.match(/loki_ingester_chunks_created_total\{[^}]*\}\s+(\d+)/);
+                if (rateMatch) {
+                    document.getElementById('ingestion-rate').textContent = 
+                        parseInt(rateMatch[1]).toLocaleString() + ' chunks';
+                }
+                
+                // Parse active streams
+                const streamsMatch = data.match(/loki_ingester_streams_created_total\{[^}]*\}\s+(\d+)/);
+                if (streamsMatch) {
+                    document.getElementById('active-streams').textContent = 
+                        parseInt(streamsMatch[1]).toLocaleString();
+                }
+            })
+            .catch(error => {
+                console.error('Failed to fetch metrics:', error);
+            });
+    </script>
+</body>
+</html>
